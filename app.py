@@ -12,14 +12,20 @@ def app(environ, start_response):
         body = b'404: Nothing here'
         headers = [('Content-Type', 'text/plain')]
         status = '404 Not Found'
+        start_response(status, headers)
         return [body]
 
-    if environ['PATH_INFO'] == '/favicon.ico':
-        return not_found()
+    path = environ['PATH_INFO']
 
-    elif environ['PATH_INFO'] == '/style.css':
-        return page(environ, 'style.css', 'text/css')
+    if path == '/texto.html' \
+            or path == '/' \
+            or path == '/static/texto.html' \
+            or path == '/static/':
+        return page(environ, 'static/texto.html', 'text/html')
+
+    elif path == '/style.css' \
+            or '/static/style.css':
+        return page(environ, 'static/style.css', 'text/css')
 
     else:
-        return page(environ, 'texto.html', 'text/html')
-
+        return not_found()
