@@ -1,22 +1,25 @@
 def app(environ, start_response):
 
-    if environ['PATH_INFO'] == '/style.css':
-        with open('style.css', 'rb') as f:
+    def page(environ, file, c_type):
+        with open(file, 'rb') as f:
             body = f.read()
-            headers = [('Content-Type', 'text/css')]
+            headers = [('Content-Type', c_type)]
             status = '200 OK'
+        start_response(status, headers)
+        return [body]
 
-    elif environ['PATH_INFO'] == '/favicon.ico':
+    def not_found():
         body = b'404: Nothing here'
         headers = [('Content-Type', 'text/plain')]
         status = '404 Not Found'
+        return [body]
+
+    if environ['PATH_INFO'] == '/favicon.ico':
+        return not_found()
+
+    elif environ['PATH_INFO'] == '/style.css':
+        return page(environ, 'style.css', 'text/css')
 
     else:
-        with open('texto.html', 'rb') as f:
-            body = f.read()
-            headers = [('Content-Type', 'text/html')]
-            status = '200 OK'
+        return page(environ, 'texto.html', 'text/html')
 
-    start_response(status, headers)
-
-    return [body]
