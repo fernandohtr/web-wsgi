@@ -1,31 +1,59 @@
+import os
+
+
 def app(environ, start_response):
+    url_path = environ['PATH_INFO']
 
-    def page(environ, file, c_type):
-        with open(file, 'rb') as f:
-            body = f.read()
-            headers = [('Content-Type', c_type)]
-            status = '200 OK'
-        start_response(status, headers)
-        return [body]
+    if url_path == '/' or url_path == '/static/':
+        url_path = '/texto.html'
 
-    def not_found():
-        body = b'404: Nothing here'
-        headers = [('Content-Type', 'text/plain')]
-        status = '404 Not Found'
-        start_response(status, headers)
-        return [body]
-
-    path = environ['PATH_INFO']
-
-    if path == '/texto.html' \
-            or path == '/' \
-            or path == '/static/texto.html' \
-            or path == '/static/':
-        return page(environ, 'static/texto.html', 'text/html')
-
-    elif path == '/style.css' \
-            or '/static/style.css':
-        return page(environ, 'static/style.css', 'text/css')
-
+    if url_path[1:] in os.listdir('static'):
+        response = route(url_path)
     else:
-        return not_found()
+        response = not_found()
+
+    body, headers, status = response
+    start_response(status, headers)
+    return [body]
+
+
+def not_found():
+    body = b'404: Nothing here'
+    headers = [('Content-Type', 'text/plain')]
+    status = '404 Not Found'
+    return body, headers, status
+
+
+def route(url_path):
+    body = read_body(url_path)
+    headers = [('Content-Type', mime(url_path))]
+    status = '200 OK'
+    return body, headers, status
+
+
+def read_body(url_path):
+    local_path = 'static' + url_path
+    with open(local_path, 'rb') as f:
+        return f.read()
+
+
+def mime(url_path):
+    types = {
+        'bmp': 'image',
+        'gif': 'image',
+        'jpeg': 'image',
+        'png': 'image',
+        'tiff': 'image',
+        'css': 'text',
+        'csv': 'text',
+        'html': 'text',
+        'calendar': 'text',
+        'javascript': 'text',
+        'plain': 'text',
+        'json': 'application',
+        'pdf': 'application',
+        'xhtml+xml': 'application'
+        }
+
+    extension = url_path.split('.')[-1]
+    return types[extension] + '/' + extension
