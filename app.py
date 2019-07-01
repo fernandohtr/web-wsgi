@@ -1,52 +1,59 @@
+import os
+
+
 def app(environ, start_response):
+    url_path = environ['PATH_INFO']
 
-    path = environ['PATH_INFO']
-    files = os.listdir('static')
+    if url_path == '/' or url_path == '/static/':
+        url_path = '/texto.html'
 
-    if path == '/':
-        path = '/static/texto.html'
-        route(environ, start_response, )
-    elif path[1:] in files:
-        pass
+    if url_path[1:] in os.listdir('static'):
+        response = route(url_path)
     else:
+        response = not_found()
 
-
-        rote(environ, path)
-            or path == '/' \
-            or path == '/static/texto.html' \
-            or path == '/static/':
-        return page(environ, start_response, 'static/texto.html', 'text/html')
-
-    if path == '/texto.html' \
-            or path == '/' \
-            or path == '/static/texto.html' \
-            or path == '/static/':
-        return page(environ, start_response, 'static/texto.html', 'text/html')
-
-    elif path == '/style.css' \
-            or '/static/style.css':
-        return page(environ, start_response, 'static/style.css', 'text/css')
-
-    else:
-        return not_found(start_response)
-
-
-def page(environ, start_response, file, c_type):
-    with open(file, 'rb') as f:
-        body = f.read()
-        headers = [('Content-Type', c_type)]
-        status = '200 OK'
+    body, headers, status = response
     start_response(status, headers)
     return [body]
 
 
-def not_found(start_response):
+def not_found():
     body = b'404: Nothing here'
     headers = [('Content-Type', 'text/plain')]
     status = '404 Not Found'
-    start_response(status, headers)
-    return [body]
+    return body, headers, status
 
 
-def route(environ):
-    pass
+def route(url_path):
+    body = read_body(url_path)
+    headers = [('Content-Type', mime(url_path))]
+    status = '200 OK'
+    return body, headers, status
+
+
+def read_body(url_path):
+    local_path = 'static' + url_path
+    with open(local_path, 'rb') as f:
+        return f.read()
+
+
+def mime(url_path):
+    types = {
+        'bmp': 'image',
+        'gif': 'image',
+        'jpeg': 'image',
+        'png': 'image',
+        'tiff': 'image',
+        'css': 'text',
+        'csv': 'text',
+        'html': 'text',
+        'calendar': 'text',
+        'javascript': 'text',
+        'plain': 'text',
+        'json': 'application',
+        'pdf': 'application',
+        'xhtml+xml': 'application'
+        }
+
+    extension = url_path.split('.')[-1]
+    return types[extension] + '/' + extension
