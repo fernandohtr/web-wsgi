@@ -2,10 +2,11 @@ import os
 
 
 def app(environ, start_response):
+    print(environ['wsgi.input'].read())
     url_path = environ['PATH_INFO']
 
     if url_path == '/' or url_path == '/static/':
-        url_path = '/texto.html'
+        url_path = '/index.html'
 
     if url_path[1:] in os.listdir('static'):
         response = route(url_path)
