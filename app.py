@@ -1,15 +1,8 @@
 import os
-import json
 
 
 def app(environ, start_response):
     url_path = environ['PATH_INFO']
-    read_bytes = environ['wsgi.input'].read()
-
-    if len(read_bytes) > 0:
-        with open('content/register.txt', 'a') as save_doc:
-            read_str = read_bytes.decode('utf-8')
-            save_doc.write(read_str)
 
     if url_path == '/' or url_path == '/static/':
         url_path = '/index.html'
@@ -35,8 +28,6 @@ def route(environ, url_path):
     if environ['REQUEST_METHOD'] == 'POST':
         read_bytes = environ['wsgi.input'].read()
         read_str = read_bytes.decode('utf-8')
-        with open('content/register.json', 'w') as f:
-            f.write(read_str)
         save_info(read_str)
 
     body = read_body(url_path)
@@ -46,11 +37,8 @@ def route(environ, url_path):
 
 
 def save_info(read_str):
-    infos = read_str.split('&')
-    for i in range(3):
-        key, valor = infos[i].split('=')
-        info_organize[key] = valor
-    json.dumps(info_organize)
+    with open('content/register.txt', 'a+') as f:
+        f.write(read_str + '\n')
 
 
 def read_body(url_path):
