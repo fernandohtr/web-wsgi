@@ -1,1 +1,8 @@
+# Bystes compilados
 __pycache__/
+
+# Ambiente virtual
+ENV/
+
+# Arquivo gerado pela execução do código
+content/register.txt
