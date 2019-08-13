@@ -5,10 +5,10 @@ def app(environ, start_response):
     url_path = environ['PATH_INFO']
 
     if url_path == '/' or url_path == '/static/':
-        url_path = '/texto.html'
+        url_path = '/index.html'
 
     if url_path[1:] in os.listdir('static'):
-        response = route(url_path)
+        response = route(environ, url_path)
     else:
         response = not_found()
 
@@ -24,11 +24,21 @@ def not_found():
     return body, headers, status
 
 
-def route(url_path):
+def route(environ, url_path):
+    if environ['REQUEST_METHOD'] == 'POST':
+        read_bytes = environ['wsgi.input'].read()
+        read_str = read_bytes.decode('utf-8')
+        save_info(read_str)
+
     body = read_body(url_path)
     headers = [('Content-Type', mime(url_path))]
     status = '200 OK'
     return body, headers, status
+
+
+def save_info(read_str):
+    with open('content/register.txt', 'a+') as f:
+        f.write(read_str + '\n')
 
 
 def read_body(url_path):
